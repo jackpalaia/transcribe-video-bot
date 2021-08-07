@@ -10,6 +10,8 @@ validUrls = ["youtube", "youtu.be"]
 
 
 def main():
+
+    # Set up Reddit instance
     reddit = praw.Reddit(
         user_agent="transcribe-video-bot (by u/transcribe-video-bot)",
         client_id=os.getenv("CLIENT_ID"),
