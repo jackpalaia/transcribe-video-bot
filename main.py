@@ -2,6 +2,7 @@ import os
 import praw
 
 from dotenv import load_dotenv
+from youtube_transcript_api import YouTubeTranscriptApi
 
 load_dotenv()
 
@@ -10,8 +11,6 @@ validUrls = ["youtube", "youtu.be"]
 
 
 def main():
-
-    # Set up Reddit instance
     reddit = praw.Reddit(
         user_agent="transcribe-video-bot (by u/transcribe-video-bot)",
         client_id=os.getenv("CLIENT_ID"),
@@ -23,8 +22,24 @@ def main():
     subreddit = reddit.subreddit("test")
     for comment in subreddit.stream.comments():
         if isCommentValid(comment):
-            print(comment.permalink)
-            comment.reply("hello!")
+            url = comment.submission.url
+            video_id = url.split("=")[1]
+            transcript_list = []
+            try:
+                transcript_list = YouTubeTranscriptApi.get_transcript(video_id=video_id)
+            except:
+                continue
+            
+            transcript = "Here is your transcription:\n\n"
+            for part in transcript_list:
+                text = part['text'].replace("\n", " ").replace(" !", "!").replace(" ?", "?") + " "
+                transcript += text
+            transcript += "\n\nThis action was performed by a bot. Please contact u/MangoToothpaste if there are any issues."
+            
+            comment.reply(transcript)
+                    
+            # Reply with the video transcription
+
 
 
 # Returns true if the comment is a valid signal.
@@ -39,6 +54,7 @@ def isCommentValid(comment):
             or any(url in comment.submission.url for url in validUrls)
         )
         and "bot" not in comment.body
+        and comment.submission.author is not None
     )
 
 
