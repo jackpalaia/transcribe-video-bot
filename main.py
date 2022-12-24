@@ -21,6 +21,7 @@ def main():
 
     unread_messages = []
     for item in reddit.inbox.unread(limit=None):
+        print(item.body)
         if isinstance(item, praw.models.Comment) and isCommentSummon(item):
             unread_messages.append(item)
             url = item.submission.url
