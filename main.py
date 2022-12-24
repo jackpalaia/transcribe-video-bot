@@ -3,11 +3,14 @@ import praw
 
 from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi
+from datetime import datetime
 
 load_dotenv()
 
 
 def main():
+    print(datetime.now())
+
     reddit = praw.Reddit(
         user_agent="transcribe-video-bot (by u/transcribe-video-bot)",
         client_id=os.getenv("CLIENT_ID"),
@@ -16,11 +19,13 @@ def main():
         password=os.getenv("PASSWORD"),
     )
 
-    subreddit = reddit.subreddit("test")
-    for comment in subreddit.stream.comments(skip_existing=True):
-        if isCommentValid(comment):
-            url = comment.submission.url
-            video_id = url.split("=")[1]
+    unread_messages = []
+    for item in reddit.inbox.unread(limit=None):
+        if isinstance(item, praw.models.Comment) and isCommentSummon(item):
+            unread_messages.append(item)
+            url = item.submission.url
+            print(url)
+            video_id = url[-11:]
             transcript_list = []
             try:
                 transcript_list = YouTubeTranscriptApi.get_transcript(
@@ -35,10 +40,12 @@ def main():
                 transcript += text
             transcript += "\n\n*This action was performed by a bot. Please contact u/MangoToothpaste if there are any issues.*"
 
-            comment.reply(transcript)
+            item.reply(transcript)
+
+    reddit.inbox.mark_read(unread_messages)
 
 
-def isCommentValid(comment):
+def isCommentSummon(comment):
     """
     Returns true if the comment contains content that summons the bot.
     """
