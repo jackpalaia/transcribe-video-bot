@@ -1,5 +1,5 @@
-Reddit bot that transcribes video dialog.
+Reddit bot that transcribes video dialog. To use, comment on the video with "u/transcribe-video-bot" in the text. The bot will reply to the comment with the transcript.
 
 Currently running on an AWS EC2 instance.
 
-Call by commenting "u/transcribe-video-bot" on the post with the video you'd like to transcribe.
+Please contact me if you would like to contribute or are having any issues with the bot.
